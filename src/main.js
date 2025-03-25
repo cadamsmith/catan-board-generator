@@ -149,6 +149,16 @@ const r = 50;
 
 drawGrid(5, 5);
 
+document.getElementById("generate").addEventListener("click", () => {
+  const width = document.getElementById("width").value;
+  const height = document.getElementById("height").value;
+
+  // clear the canvas
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  drawGrid(width, height);
+});
+
 /**
  * Draws a grid of hexagons of given width and height
  * @param {number} width - How many hexagons wide the grid is
