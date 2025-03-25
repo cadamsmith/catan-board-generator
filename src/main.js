@@ -24,7 +24,7 @@ const DEV_CARD_TYPES = makeEnum("DevCardTypes", [
   "VICTORY_POINT",
 ]);
 
-const harbors = [
+const harborCounts = [
   {
     resource: RESOURCES.ANY,
     cost: 3,
@@ -52,7 +52,7 @@ const harbors = [
   },
 ];
 
-const resourceCards = [
+const resourceCardCounts = [
   {
     resource: RESOURCES.BRICK,
     count: 19,
@@ -75,10 +75,10 @@ const resourceCards = [
   },
 ];
 
-const hexTiles = [
+const hexTileCounts = [
   {
     type: HEX_TYPES.HILLS,
-    count: 2,
+    count: 3,
   },
   {
     type: HEX_TYPES.FOREST,
@@ -102,7 +102,7 @@ const hexTiles = [
   },
 ];
 
-const devCards = [
+const devCardCounts = [
   {
     type: DEV_CARD_TYPES.KNIGHT,
     count: 14,
@@ -125,12 +125,21 @@ const devCards = [
   },
 ];
 
+const baseMap = [
+  [0, 1, 1, 1, 0],
+  [1, 1, 1, 1, 0],
+  [1, 1, 1, 1, 1],
+  [1, 1, 1, 1, 0],
+  [0, 1, 1, 1, 0]
+];
+
 const config = {
-  hexTiles,
+  hexTileCounts,
   number_tokens: [2, 3, 3, 4, 4, 5, 5, 6, 6, 8, 8, 9, 9, 10, 10, 11, 11, 12],
-  harbors,
-  resourceCards,
-  devCards,
+  harborCounts,
+  resourceCardCounts,
+  devCardCounts,
+  baseMap,
 };
 
 const MATH_CONSTANTS = {
@@ -148,19 +157,56 @@ const ctx = canvas.getContext("2d");
 
 const padding = 30;
 
-drawGrid(5, 5);
+init(config);
 
-document.getElementById("width").addEventListener("input", () => {
-  const width = parseInt(document.getElementById("width").value);
-  const height = parseInt(document.getElementById("height").value);
-  drawGrid(width, height);
-});
+function init(config) {
+  processConfig(config);
 
-document.getElementById("height").addEventListener("input", () => {
-  const width = parseInt(document.getElementById("width").value); 
-  const height = parseInt(document.getElementById("height").value);
-  drawGrid(width, height);
-});
+  drawGrid(config.width, config.height);
+}
+
+function processConfig(config) {
+  const { baseMap } = config;
+
+  // determine the dimensions of the hex grid
+  config.width = Math.max(...baseMap.map(row => row.length));
+  config.height = baseMap.length;
+
+  // flatten the hex tiles so we can randomly select from them
+  hexTiles = [];
+  for (let i = 0; i < config.hexTileCounts.length; i++) {
+    const hexTile = config.hexTileCounts[i];
+    const hexType = hexTile.type;
+    const hexCount = hexTile.count;
+
+    hexTiles.push(...Array(hexCount).fill(hexType));
+  }
+
+  // randomly shuffle the hex tiles
+  hexTiles = shuffle(hexTiles);
+
+  // make empty 2d hexes array (height x width)
+  config.hexes = [];
+  for (let i = 0; i < config.height; i++) {
+    config.hexes[i] = [];
+  }
+
+  for (let j = 0; j < config.height; j++) {
+    for (let i = 0; i < config.width; i++) {
+      let hexType = '';
+      if (baseMap[j].length > i && baseMap[j][i] === 1) {
+        hexType = hexTiles.pop();
+      }
+
+      config.hexes[j].push({
+        type: hexType,
+        coordinates: [i, j]
+      });
+    }
+  }
+  
+  console.log(config.hexes);
+}
 
 /**
  * Draws a grid of hexagons of given width and height
@@ -187,15 +233,20 @@ function drawGrid(width, height) {
 
   for (let j = 0; j < height; j++) {
     for (let i = 0; i < width; i++) {
-      const points = drawHexagon(center[0], center[1], r);
+      const hexData = config.hexes[j][i];
 
-      const hex = {
-        center,
-        points,
-        coordinates: [i, j]
-      };
+      const fillColor = getHexFillColor(hexData.type);
 
-      settings.hexes.push(hex);
+      const points = drawHexagon(center[0], center[1], r, fillColor);
+
+      hexData.points = points;
+      hexData.center = center;
+
+      // write coords in the center of the hexagon
+      ctx.fillStyle = '#fff';
+      ctx.font = '12px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(`${i},${j}`, center[0], center[1]);
 
       center[0] += 2 * r * MATH_CONSTANTS.SQRT_3_OVER_2;
     }
@@ -209,6 +260,25 @@ function drawGrid(width, height) {
   }
 }
 
+function getHexFillColor(hexType) {
+  switch (hexType) {
+    case HEX_TYPES.HILLS:
+      return '#A4553C';
+    case HEX_TYPES.FOREST:
+      return '#326C42';
+    case HEX_TYPES.MOUNTAINS:
+      return '#74777F';
+    case HEX_TYPES.FIELDS:
+      return '#CEA322';
+    case HEX_TYPES.PASTURE:
+      return '#77B336';
+    case HEX_TYPES.DESERT:
+      return '#A09055';
+    default:
+      return '#fff';
+  }
+}
+
 /**
  * Draws a hexagon at the given coordinates with the given radius
  * @param {number} x - The x coordinate of the center of the hexagon
@@ -216,7 +286,7 @@ function drawGrid(width, height) {
  * @param {number} r - The radius of the hexagon
  * @returns {number[][]} The coordinates of the 6 hexagon points
  */
-function drawHexagon(x, y, r) {
+function drawHexagon(x, y, r, fillColor) {
   const points = [];
 
   ctx.beginPath();
@@ -229,8 +299,9 @@ function drawHexagon(x, y, r) {
 
     ctx.lineTo(point[0], point[1]);
   }
+
   ctx.closePath();
-  ctx.fillStyle = '#6D466B';
+  ctx.fillStyle = fillColor;
   ctx.fill();
   ctx.stroke();
 
@@ -312,4 +383,11 @@ function makeEnum(name, values) {
       {}
     )
   );
+}
+
+function shuffle(arr) {
+  return arr
+    .map((v) => ({ val: v, key: Math.random() }))
+    .sort((a, b) => a.key - b.key)
+    .map((o) => o.val);
 }
