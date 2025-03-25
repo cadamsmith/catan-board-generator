@@ -150,10 +150,15 @@ const padding = 30;
 
 drawGrid(5, 5);
 
-document.getElementById("generate").addEventListener("click", () => {
+document.getElementById("width").addEventListener("input", () => {
   const width = parseInt(document.getElementById("width").value);
   const height = parseInt(document.getElementById("height").value);
+  drawGrid(width, height);
+});
 
+document.getElementById("height").addEventListener("input", () => {
+  const width = parseInt(document.getElementById("width").value); 
+  const height = parseInt(document.getElementById("height").value);
   drawGrid(width, height);
 });
 

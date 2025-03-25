@@ -13,53 +13,54 @@
     <title>Hex Board Generator</title>
   </head>
   <body>
-    <div class="container">
-      <div class="row justify-content-center">
-        <div class="col-12 col-md-6">
-          <div id="settings" class="card my-4">
-            <div class="card-header text-center">
-              <h1 class="card-title h3">Hex Board Generator</h1>
-            </div>
-            <div class="card-body">
-              <div class="row mb-3">
-                <div class="col-6">
-                  <label class="form-label">Width</label>
-                  <input type="number" id="width" class="form-control" value="5" min="1" max="100" />
+    <main>
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-12 col-md-6">
+            <div id="settings" class="card my-4">
+              <div class="card-header text-center">
+                <h1 class="card-title h3">Hex Board Generator</h1>
+              </div>
+              <div class="card-body">
+                <div class="row mb-3">
+                  <div class="col-6">
+                    <label class="form-label" for="width">Width</label>
+                    <input type="number" id="width" class="form-control" value="5" min="1" max="40" />
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label" for="height">Height</label>
+                    <input type="number" id="height" class="form-control" value="5" min="1" max="40" />
+                  </div>
                 </div>
-                <div class="col-6">
-                  <label class="form-label">Height</label>
-                  <input type="number" id="height" class="form-control" value="5" min="1" max="100" />
+                <div class="row">
+                  <div class="col-12">
+                    <p class="mb-0">Checking my math... hopefully it's right</p>
+  
+                    <a href="https://eperezcosano.github.io/hex-grid/" target="_blank">
+                      Learned a lot from this guy's hex grid tutorial
+                    </a>
+  
+                    <br />
+  
+                    <a href="https://www.redblobgames.com/grids/hexagons/" target="_blank">
+                      This is also a good resource
+                    </a>
+                  </div>
                 </div>
               </div>
-              <div class="row">
-                <div class="col-12 mb-3">
-                  <p class="mb-0">Checking my math... hopefully it's right</p>
-
-                  <a href="https://eperezcosano.github.io/hex-grid/" target="_blank">
-                    Learned a lot from this guy's hex grid tutorial
-                  </a>
-
-                  <br />
-
-                  <a href="https://www.redblobgames.com/grids/hexagons/" target="_blank">
-                    This is also a good resource
-                  </a>
-                </div>
-              </div>
-              <button id="generate" class="btn btn-primary w-100">Generate!</button>
             </div>
           </div>
         </div>
-      </div>
-
-      <div class="d-flex justify-content-center align-items-center flex-column">
-        <canvas id="board" width="800" height="600"></canvas>
-
-        <div class="canvas-footer">
-          <p>🦖🦖 Made by a <a href="https://github.com/cadamsmith">green dinosaur dude</a> 🦖🦖</p>
+  
+        <div class="d-flex justify-content-center align-items-center flex-column">
+          <canvas id="board" width="800" height="600"></canvas>
+  
+          <div class="canvas-footer">
+            <p>🦖🦖 Made by a <a href="https://github.com/cadamsmith">green dinosaur dude</a> 🦖🦖</p>
+          </div>
         </div>
       </div>
-    </div>
+    </main>
 
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
