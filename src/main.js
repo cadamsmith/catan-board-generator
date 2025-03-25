@@ -135,6 +135,8 @@ const config = {
 
 const MATH_CONSTANTS = {
   SIXTY_DEGREES: Math.PI / 3,
+  SQRT_3_OVER_2: Math.sqrt(3) / 2,
+  SQRT_3: Math.sqrt(3),
 };
 
 const settings = {
@@ -144,16 +146,13 @@ const settings = {
 const canvas = document.getElementById("board");
 const ctx = canvas.getContext("2d");
 
-const r = 50;
+const padding = 30;
 
 drawGrid(5, 5);
 
 document.getElementById("generate").addEventListener("click", () => {
-  const width = document.getElementById("width").value;
-  const height = document.getElementById("height").value;
-
-  // clear the canvas
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const width = parseInt(document.getElementById("width").value);
+  const height = parseInt(document.getElementById("height").value);
 
   drawGrid(width, height);
 });
@@ -164,28 +163,40 @@ document.getElementById("generate").addEventListener("click", () => {
  * @param {number} height - How many hexagons tall the grid is
  */
 function drawGrid(width, height) {
-  const topLeft = [100, 100];
+  // clear the canvas
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = '#A8E0FF';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const r = calculateHexRadius(width, height);
+
+  const gridMeasures = calculateGridMeasures(width, height, r);
+  const leftOffset = padding + ((getCanvasWidth() - gridMeasures.width) / 2);
+  const topOffset = padding + ((getCanvasHeight() - gridMeasures.height) / 2);
+
+  const topLeft = [leftOffset + r * MATH_CONSTANTS.SQRT_3_OVER_2, topOffset + r];
+  console.log(topLeft);
 
   const center = [...topLeft];
 
   for (let j = 0; j < height; j++) {
     for (let i = 0; i < width; i++) {
-      const points = drawHexagon(center[0], center[1]);
+      const points = drawHexagon(center[0], center[1], r);
 
       const hex = {
         center,
         points,
-        coordinates: [i, j],
-        type: 'hex',
+        coordinates: [i, j]
       };
 
       settings.hexes.push(hex);
 
-      center[0] += 2 * r * Math.sin(MATH_CONSTANTS.SIXTY_DEGREES);
+      center[0] += 2 * r * MATH_CONSTANTS.SQRT_3_OVER_2;
     }
 
     if (j % 2 === 0) {
-      center[0] = topLeft[0] + r * Math.sin(MATH_CONSTANTS.SIXTY_DEGREES);
+      center[0] = topLeft[0] + r * MATH_CONSTANTS.SQRT_3_OVER_2;
     } else {
       center[0] = topLeft[0];
     }
@@ -200,7 +211,7 @@ function drawGrid(width, height) {
  * @param {number} r - The radius of the hexagon
  * @returns {number[][]} The coordinates of the 6 hexagon points
  */
-function drawHexagon(x, y) {
+function drawHexagon(x, y, r) {
   const points = [];
 
   ctx.beginPath();
@@ -214,9 +225,68 @@ function drawHexagon(x, y) {
     ctx.lineTo(point[0], point[1]);
   }
   ctx.closePath();
+  ctx.fillStyle = '#6D466B';
+  ctx.fill();
   ctx.stroke();
 
   return points;
+}
+
+/**
+ * Calculates the maximum hexagon radius that can fit in the canvas for specified width and height
+ * @param {number} width - How many hexagons wide the grid is
+ * @param {number} height - How many hexagons tall the grid is
+ * @returns {number} The radius of the hexagon
+ */
+function calculateHexRadius(width, height) {
+  let maxHexWidth;
+  if (height === 1) {
+    maxHexWidth = getCanvasWidth() / width;
+  } else {
+    maxHexWidth = (2 * getCanvasWidth()) / (width * 2 + 1);
+  }
+
+  const maxHexHeight = (4 * getCanvasHeight()) / (3 * height + 1);
+
+  return Math.min(maxHexWidth / MATH_CONSTANTS.SQRT_3, maxHexHeight / 2);
+}
+
+/**
+ * Calculates the width and height of the grid based on the grid's dimensions and hexagon radius
+ * @param {number} width - How many hexagons wide the grid is
+ * @param {number} height - How many hexagons tall the grid is
+ * @param {number} r - The radius of the hexagon
+ * @returns {Object} The width and height of the grid
+ */
+function calculateGridMeasures(width, height, r) {
+  let gridWidth;
+  let gridHeight;
+
+  if (height === 1) {
+    gridWidth = r * MATH_CONSTANTS.SQRT_3 * width;
+  } else {
+    gridWidth = r * MATH_CONSTANTS.SQRT_3 * (2 * width + 1) / 2;
+  }
+
+  gridHeight = ((3 * height + 1) / 2) * r;
+
+  return { width: gridWidth, height: gridHeight };
+}
+
+/**
+ * Returns the width of the canvas (minus the padding)
+ * @returns {number} The width of the canvas
+ */
+function getCanvasWidth() {
+  return canvas.width - 2 * padding;
+}
+
+/**
+ * Returns the height of the canvas (minus the padding)
+ * @returns {number} The height of the canvas
+ */
+function getCanvasHeight() {
+  return canvas.height - 2 * padding;
 }
 
 /**
