@@ -143,7 +143,6 @@ const settings = {
 
 const canvas = document.getElementById("board");
 const ctx = canvas.getContext("2d");
-ctx.textAlign = "center";
 
 const r = 50;
 
