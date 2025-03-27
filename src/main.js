@@ -1,145 +1,31 @@
-const RESOURCES = makeEnum("Resources", [
-  "BRICK",
-  "LUMBER",
-  "ORE",
-  "GRAIN",
-  "WOOL",
-  "ANY",
-]);
+const GAME_TYPES = {
+  BASE_3_4: enumValue("BASE_3_4"),
+};
 
-const HEX_TYPES = makeEnum("HexTypes", [
-  "HILLS",
-  "FOREST",
-  "MOUNTAINS",
-  "FIELDS",
-  "PASTURE",
-  "DESERT",
-]);
+const RESOURCES = {
+  BRICK: enumValue("BRICK"),
+  LUMBER: enumValue("LUMBER"),
+  ORE: enumValue("ORE"),
+  GRAIN: enumValue("GRAIN"),
+  WOOL: enumValue("WOOL"),
+  ANY: enumValue("ANY"),
+};
 
-const DEV_CARD_TYPES = makeEnum("DevCardTypes", [
-  "KNIGHT",
-  "ROAD_BUILDING",
-  "YEAR_OF_PLENTY",
-  "MONOPOLY",
-  "VICTORY_POINT",
-]);
+const HEX_TYPES = {
+  HILLS: enumValue("HILLS"),
+  FOREST: enumValue("FOREST"),
+  MOUNTAINS: enumValue("MOUNTAINS"),
+  FIELDS: enumValue("FIELDS"),
+  PASTURE: enumValue("PASTURE"),
+  DESERT: enumValue("DESERT"),
+};
 
-const harborCounts = [
-  {
-    resource: RESOURCES.ANY,
-    cost: 3,
-    count: 4,
-  },
-  {
-    resource: RESOURCES.LUMBER,
-    cost: 2,
-  },
-  {
-    resource: RESOURCES.BRICK,
-    cost: 2,
-  },
-  {
-    resource: RESOURCES.WOOL,
-    cost: 1,
-  },
-  {
-    resource: RESOURCES.GRAIN,
-    cost: 1,
-  },
-  {
-    resource: RESOURCES.ORE,
-    cost: 1,
-  },
-];
-
-const resourceCardCounts = [
-  {
-    resource: RESOURCES.BRICK,
-    count: 19,
-  },
-  {
-    resource: RESOURCES.LUMBER,
-    count: 19,
-  },
-  {
-    resource: RESOURCES.WOOL,
-    count: 19,
-  },
-  {
-    resource: RESOURCES.GRAIN,
-    count: 19,
-  },
-  {
-    resource: RESOURCES.ORE,
-    count: 19,
-  },
-];
-
-const hexTileCounts = [
-  {
-    type: HEX_TYPES.HILLS,
-    count: 3,
-  },
-  {
-    type: HEX_TYPES.FOREST,
-    count: 4,
-  },
-  {
-    type: HEX_TYPES.MOUNTAINS,
-    count: 3,
-  },
-  {
-    type: HEX_TYPES.FIELDS,
-    count: 4,
-  },
-  {
-    type: HEX_TYPES.PASTURE,
-    count: 4,
-  },
-  {
-    type: HEX_TYPES.DESERT,
-    count: 1,
-  },
-];
-
-const devCardCounts = [
-  {
-    type: DEV_CARD_TYPES.KNIGHT,
-    count: 14,
-  },
-  {
-    type: DEV_CARD_TYPES.ROAD_BUILDING,
-    count: 2,
-  },
-  {
-    type: DEV_CARD_TYPES.YEAR_OF_PLENTY,
-    count: 2,
-  },
-  {
-    type: DEV_CARD_TYPES.MONOPOLY,
-    count: 2,
-  },
-  {
-    type: DEV_CARD_TYPES.VICTORY_POINT,
-    count: 5,
-  },
-];
-
-const baseMap = [
-  [0, 1, 1, 1, 0],
-  [1, 1, 1, 1, 0],
-  [1, 1, 1, 1, 1],
-  [1, 1, 1, 1, 0],
-  [0, 1, 1, 1, 0]
-];
-
-const config = {
-  hexTileCounts,
-  number_tokens: [2, 3, 3, 4, 4, 5, 5, 6, 6, 8, 8, 9, 9, 10, 10, 11, 11, 12],
-  harborCounts,
-  resourceCardCounts,
-  devCardCounts,
-  baseMap,
+const DEV_CARD_TYPES = {
+  KNIGHT: enumValue("KNIGHT"),
+  ROAD_BUILDING: enumValue("ROAD_BUILDING"),
+  YEAR_OF_PLENTY: enumValue("YEAR_OF_PLENTY"),
+  MONOPOLY: enumValue("MONOPOLY"),
+  VICTORY_POINT: enumValue("VICTORY_POINT"),
 };
 
 const MATH_CONSTANTS = {
@@ -155,35 +41,180 @@ const settings = {
 const canvas = document.getElementById("board");
 const ctx = canvas.getContext("2d");
 
+ctx.font = "24px Arial";
+ctx.textAlign = "center";
+ctx.textBaseline = "middle";
+
 const padding = 30;
+
+const config = getBoardConfig(GAME_TYPES.BASE_3_4);
 
 init(config);
 
+/**
+ * Initializes the board
+ * @param {Object} config - The configuration object
+ */
 function init(config) {
   processConfig(config);
 
   drawGrid(config.width, config.height);
 }
 
+/**
+ * Returns the configuration object for the given game type
+ * @param {string} gameType - The game type
+ * @returns {Object} The configuration object
+ */
+function getBoardConfig(gameType) {
+  switch (gameType) {
+    case GAME_TYPES.BASE_3_4:
+      return getBase34Config();
+    default:
+      throw new Error(`Invalid game type: ${gameType}`);
+  }
+}
+
+/**
+ * Returns the configuration object for the base 3-5 player game type
+ * @returns {Object} The configuration object
+ */
+function getBase34Config() {
+  const harborCounts = [
+    {
+      resource: RESOURCES.ANY,
+      cost: 3,
+      count: 4,
+    },
+    {
+      resource: RESOURCES.LUMBER,
+      cost: 2,
+    },
+    {
+      resource: RESOURCES.BRICK,
+      cost: 2,
+    },
+    {
+      resource: RESOURCES.WOOL,
+      cost: 1,
+    },
+    {
+      resource: RESOURCES.GRAIN,
+      cost: 1,
+    },
+    {
+      resource: RESOURCES.ORE,
+      cost: 1,
+    },
+  ];
+
+  const resourceCardCounts = [
+    {
+      resource: RESOURCES.BRICK,
+      count: 19,
+    },
+    {
+      resource: RESOURCES.LUMBER,
+      count: 19,
+    },
+    {
+      resource: RESOURCES.WOOL,
+      count: 19,
+    },
+    {
+      resource: RESOURCES.GRAIN,
+      count: 19,
+    },
+    {
+      resource: RESOURCES.ORE,
+      count: 19,
+    },
+  ];
+
+  const hexTileCounts = [
+    {
+      type: HEX_TYPES.HILLS,
+      count: 3,
+    },
+    {
+      type: HEX_TYPES.FOREST,
+      count: 4,
+    },
+    {
+      type: HEX_TYPES.MOUNTAINS,
+      count: 3,
+    },
+    {
+      type: HEX_TYPES.FIELDS,
+      count: 4,
+    },
+    {
+      type: HEX_TYPES.PASTURE,
+      count: 4,
+    },
+    {
+      type: HEX_TYPES.DESERT,
+      count: 1,
+    },
+  ];
+
+  const devCardCounts = [
+    {
+      type: DEV_CARD_TYPES.KNIGHT,
+      count: 14,
+    },
+    {
+      type: DEV_CARD_TYPES.ROAD_BUILDING,
+      count: 2,
+    },
+    {
+      type: DEV_CARD_TYPES.YEAR_OF_PLENTY,
+      count: 2,
+    },
+    {
+      type: DEV_CARD_TYPES.MONOPOLY,
+      count: 2,
+    },
+    {
+      type: DEV_CARD_TYPES.VICTORY_POINT,
+      count: 5,
+    },
+  ];
+
+  const baseMap = [
+    [0, 1, 1, 1, 0],
+    [1, 1, 1, 1, 0],
+    [1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 0],
+    [0, 1, 1, 1, 0],
+  ];
+
+  const config = {
+    hexTileCounts,
+    number_tokens: [2, 3, 3, 4, 4, 5, 5, 6, 6, 8, 8, 9, 9, 10, 10, 11, 11, 12],
+    harborCounts,
+    resourceCardCounts,
+    devCardCounts,
+    baseMap,
+  };
+
+  return config;
+}
+
+/**
+ * Processes the configuration object, initializing the board state
+ * @param {Object} config - The configuration object
+ */
 function processConfig(config) {
   const { baseMap } = config;
 
   // determine the dimensions of the hex grid
-  config.width = Math.max(...baseMap.map(row => row.length));
+  config.width = Math.max(...baseMap.map((row) => row.length));
   config.height = baseMap.length;
 
-  // flatten the hex tiles so we can randomly select from them
-  hexTiles = [];
-  for (let i = 0; i < config.hexTileCounts.length; i++) {
-    const hexTile = config.hexTileCounts[i];
-    const hexType = hexTile.type;
-    const hexCount = hexTile.count;
-
-    hexTiles.push(...Array(hexCount).fill(hexType));
-  }
-
-  // randomly shuffle the hex tiles
-  hexTiles = shuffle(hexTiles);
+  // Create array of hex tiles and shuffle them
+  const hexTiles = shuffleHexTiles(config.hexTileCounts);
+  const numberTokens = shuffle(config.number_tokens);
 
   // make empty 2d hexes array (height x width)
   config.hexes = [];
@@ -193,19 +224,46 @@ function processConfig(config) {
 
   for (let j = 0; j < config.height; j++) {
     for (let i = 0; i < config.width; i++) {
-      let hexType = '';
+      let hexType = "";
+
       if (baseMap[j].length > i && baseMap[j][i] === 1) {
         hexType = hexTiles.pop();
       }
 
+      let numberToken = -1;
+      if (hexType && hexType !== HEX_TYPES.DESERT) {
+        numberToken = numberTokens.pop();
+      }
+
       config.hexes[j].push({
         type: hexType,
-        coordinates: [i, j]
+        numberToken,
+        coordinates: [i, j],
       });
     }
   }
-  
+
   console.log(config.hexes);
+}
+
+/**
+ * flattens hex tiles counts into a single array and shuffles them
+ * @param {Object[]} hexTileCounts - The hex tile counts
+ * @returns {string[]} The shuffled hex tiles
+ */
+function shuffleHexTiles(hexTileCounts) {
+  // flatten the hex tiles so we can randomly select from them
+  let hexTiles = [];
+  for (let i = 0; i < hexTileCounts.length; i++) {
+    const hexTile = hexTileCounts[i];
+    const hexType = hexTile.type;
+    const hexCount = hexTile.count;
+
+    hexTiles.push(...Array(hexCount).fill(hexType));
+  }
+
+  // randomly shuffle the hex tiles
+  return shuffle(hexTiles);
 }
 
 /**
@@ -217,16 +275,19 @@ function drawGrid(width, height) {
   // clear the canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  ctx.fillStyle = '#A8E0FF';
+  ctx.fillStyle = "#A8E0FF";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   const r = calculateHexRadius(width, height);
 
   const gridMeasures = calculateGridMeasures(width, height, r);
-  const leftOffset = padding + ((getCanvasWidth() - gridMeasures.width) / 2);
-  const topOffset = padding + ((getCanvasHeight() - gridMeasures.height) / 2);
+  const leftOffset = padding + (getCanvasWidth() - gridMeasures.width) / 2;
+  const topOffset = padding + (getCanvasHeight() - gridMeasures.height) / 2;
 
-  const topLeft = [leftOffset + r * MATH_CONSTANTS.SQRT_3_OVER_2, topOffset + r];
+  const topLeft = [
+    leftOffset + r * MATH_CONSTANTS.SQRT_3_OVER_2,
+    topOffset + r,
+  ];
   console.log(topLeft);
 
   const center = [...topLeft];
@@ -242,11 +303,19 @@ function drawGrid(width, height) {
       hexData.points = points;
       hexData.center = center;
 
-      // write coords in the center of the hexagon
-      ctx.fillStyle = '#fff';
-      ctx.font = '12px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText(`${i},${j}`, center[0], center[1]);
+      if (hexData.numberToken != -1) {
+        ctx.beginPath();
+        ctx.arc(center[0], center[1], 30, 0, 2 * Math.PI);
+        ctx.stroke();
+
+        // fill circle
+        ctx.fillStyle = "#fff";
+        ctx.fill();
+
+        // write coords in the center of the hexagon
+        ctx.fillStyle = getNumberTokenColor(hexData.numberToken);
+        ctx.fillText(hexData.numberToken, center[0], center[1]);
+      }
 
       center[0] += 2 * r * MATH_CONSTANTS.SQRT_3_OVER_2;
     }
@@ -263,20 +332,28 @@ function drawGrid(width, height) {
 function getHexFillColor(hexType) {
   switch (hexType) {
     case HEX_TYPES.HILLS:
-      return '#A4553C';
+      return "#A4553C";
     case HEX_TYPES.FOREST:
-      return '#326C42';
+      return "#326C42";
     case HEX_TYPES.MOUNTAINS:
-      return '#74777F';
+      return "#74777F";
     case HEX_TYPES.FIELDS:
-      return '#CEA322';
+      return "#CEA322";
     case HEX_TYPES.PASTURE:
-      return '#77B336';
+      return "#77B336";
     case HEX_TYPES.DESERT:
-      return '#A09055';
+      return "#A09055";
     default:
-      return '#fff';
+      return "#A8E0FF";
   }
+}
+
+function getNumberTokenColor(numberToken) {
+  if (numberToken === 6 || numberToken === 8) {
+    return "#F00";
+  }
+
+  return "#000";
 }
 
 /**
@@ -341,7 +418,7 @@ function calculateGridMeasures(width, height, r) {
   if (height === 1) {
     gridWidth = r * MATH_CONSTANTS.SQRT_3 * width;
   } else {
-    gridWidth = r * MATH_CONSTANTS.SQRT_3 * (2 * width + 1) / 2;
+    gridWidth = (r * MATH_CONSTANTS.SQRT_3 * (2 * width + 1)) / 2;
   }
 
   gridHeight = ((3 * height + 1) / 2) * r;
@@ -390,4 +467,8 @@ function shuffle(arr) {
     .map((v) => ({ val: v, key: Math.random() }))
     .sort((a, b) => a.key - b.key)
     .map((o) => o.val);
+}
+
+function enumValue(name) {
+  return Object.freeze({ toString: () => name });
 }
