@@ -42,6 +42,12 @@ const settings = {
 const canvas = document.getElementById("board");
 const ctx = canvas.getContext("2d");
 
+// Add zoom state
+let zoomLevel = 1;
+const ZOOM_FACTOR = 0.1;
+const MIN_ZOOM = 0.5;
+const MAX_ZOOM = 2.0;
+
 ctx.font = "16px Arial";
 ctx.textAlign = "center";
 ctx.textBaseline = "middle";
@@ -50,24 +56,113 @@ const padding = 30;
 
 let config;
 
+generateBoard();
+
+// Add zoom event listeners
+document.getElementById("zoom-in").addEventListener("click", () => {
+  zoomLevel = Math.min(zoomLevel + ZOOM_FACTOR, MAX_ZOOM);
+  updateZoom();
+  redrawBoard();
+});
+
+document.getElementById("zoom-out").addEventListener("click", () => {
+  zoomLevel = Math.max(zoomLevel - ZOOM_FACTOR, MIN_ZOOM);
+  updateZoom();
+  redrawBoard();
+});
+
+function updateZoom() {
+  document.getElementById("zoom-level").textContent = `Zoom: ${Math.round(zoomLevel * 100)}%`;
+}
+
+function redrawBoard() {
+  if (!config) return;
+  
+  // Clear canvas
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  // Save context state
+  ctx.save();
+  
+  // Calculate center offset for zoom
+  const centerX = canvas.width / 2;
+  const centerY = canvas.height / 2;
+  
+  // Move to center of canvas
+  ctx.translate(centerX, centerY);
+  
+  // Apply zoom transformation
+  ctx.scale(zoomLevel, zoomLevel);
+  
+  // Move back by half the canvas size to center content
+  ctx.translate(-centerX, -centerY);
+  
+  // Draw the board
+  drawGrid(config.width, config.height);
+  
+  // Restore context state
+  ctx.restore();
+}
+
+
 document.querySelector("#generate-board-btn").addEventListener("click", () => {
-  if (document.querySelector("#base34").checked) {
+  generateBoard();
+});
+
+document.querySelector("#game-type").addEventListener("change", () => {
+  generateBoard();
+});
+
+function generateBoard() {
+  if (document.querySelector("#game-type").value === "BASE_3_4") {
     config = getBoardConfig(GAME_TYPES.BASE_3_4);
-  } else {
+  } else if (document.querySelector("#game-type").value === "BASE_5_6") {
     config = getBoardConfig(GAME_TYPES.BASE_5_6);
   }
+
+  // Reset zoom level
+  zoomLevel = 1;
+  updateZoom();
 
   init(config);
 
   displayResourceCardCounts(config);
   displayDevCardCounts(config);
 
-  document.querySelector(".wizard-steps").classList.add("page-2");
+  // Show the canvas container
+  document.getElementById("canvas-container").classList.remove("d-none");
+  
+  // Update canvas size after container is visible
+  setTimeout(() => {
+    const container = document.getElementById("canvas-container");
+    canvas.width = container.clientWidth
+    drawGrid(config.width, config.height);
+  }, 0);
+}
+
+// Set initial canvas size
+function updateCanvasSize() {
+  const container = document.getElementById("canvas-container");
+  const containerWidth = container.clientWidth;
+  canvas.width = containerWidth;
+  redrawBoard();
+}
+
+// Handle window resize
+window.addEventListener("resize", () => {
+  if (!document.getElementById("canvas-container").classList.contains("d-none")) {
+    updateCanvasSize();
+  }
 });
 
-document.querySelector(".prev-step-btn").addEventListener("click", () => {
-  document.querySelector(".wizard-steps").classList.remove("page-2");
+// Add resize observer for container size changes
+const resizeObserver = new ResizeObserver(() => {
+  if (!document.getElementById("canvas-container").classList.contains("d-none")) {
+    updateCanvasSize();
+  }
 });
+
+resizeObserver.observe(document.getElementById("canvas-container"));
 
 function displayResourceCardCounts(config) {
   const resourceCardCounts = config.resourceCardCounts;
@@ -138,22 +233,27 @@ function getBase34Config() {
     {
       resource: RESOURCES.LUMBER,
       cost: 2,
+      count: 1,
     },
     {
       resource: RESOURCES.BRICK,
       cost: 2,
+      count: 1,
     },
     {
       resource: RESOURCES.WOOL,
-      cost: 1,
+      cost: 2,
+      count: 1,
     },
     {
       resource: RESOURCES.GRAIN,
-      cost: 1,
+      cost: 2,
+      count: 1,
     },
     {
       resource: RESOURCES.ORE,
-      cost: 1,
+      cost: 2,
+      count: 1,
     },
   ];
 
@@ -231,13 +331,13 @@ function getBase34Config() {
   ];
 
   const baseMap = [
-    [0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 1, 1, 1, 0, 0],
-    [0, 0, 1, 1, 1, 1, 0],
-    [0, 1, 1, 1, 1, 1, 0],
-    [0, 0, 1, 1, 1, 1, 0],
-    [0, 0, 1, 1, 1, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0]
+    [0, 0, 'h0', 0, 'h5', 0, 0],
+    [0, 0, 1, 1, 1, 'h5', 0],
+    [0, 'h1', 1, 1, 1, 1, 0],
+    [0, 1, 1, 1, 1, 1, 'h4'],
+    [0, 'h1', 1, 1, 1, 1, 0],
+    [0, 0, 1, 1, 1, 'h3', 0],
+    [0, 0, 'h2', 0, 'h3', 0, 0]
   ];
 
   const config = {
@@ -261,50 +361,55 @@ function getBase56Config() {
     {
       resource: RESOURCES.ANY,
       cost: 3,
-      count: 4,
+      count: 5,
     },
     {
       resource: RESOURCES.LUMBER,
       cost: 2,
+      count: 1,
     },
     {
       resource: RESOURCES.BRICK,
       cost: 2,
+      count: 1,
     },
     {
       resource: RESOURCES.WOOL,
-      cost: 1,
+      cost: 2,
+      count: 2,
     },
     {
       resource: RESOURCES.GRAIN,
-      cost: 1,
+      cost: 2,
+      count: 1,
     },
     {
       resource: RESOURCES.ORE,
-      cost: 1,
+      cost: 2,
+      count: 1,
     },
   ];
 
   const resourceCardCounts = [
     {
       resource: RESOURCES.BRICK,
-      count: 19,
+      count: 24,
     },
     {
       resource: RESOURCES.LUMBER,
-      count: 19,
+      count: 24,
     },
     {
       resource: RESOURCES.WOOL,
-      count: 19,
+      count: 24,
     },
     {
       resource: RESOURCES.GRAIN,
-      count: 19,
+      count: 24,
     },
     {
       resource: RESOURCES.ORE,
-      count: 19,
+      count: 24,
     },
   ];
 
@@ -338,19 +443,19 @@ function getBase56Config() {
   const devCardCounts = [
     {
       type: DEV_CARD_TYPES.KNIGHT,
-      count: 14,
+      count: 20,
     },
     {
       type: DEV_CARD_TYPES.ROAD_BUILDING,
-      count: 2,
+      count: 3,
     },
     {
       type: DEV_CARD_TYPES.YEAR_OF_PLENTY,
-      count: 2,
+      count: 3,
     },
     {
       type: DEV_CARD_TYPES.MONOPOLY,
-      count: 2,
+      count: 3,
     },
     {
       type: DEV_CARD_TYPES.VICTORY_POINT,
@@ -359,15 +464,15 @@ function getBase56Config() {
   ];
 
   const baseMap = [
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 1, 1, 1, 0, 0, 0],
+    [0, 0, 0, 'h0', 0, 'h5', 0, 0, 0],
+    [0, 0, 0, 1, 1, 1, 'h5', 0, 0],
     [0, 0, 0, 1, 1, 1, 1, 0, 0],
-    [0, 0, 1, 1, 1, 1, 1, 0, 0],
+    [0, 'h1', 1, 1, 1, 1, 1, 'h4', 0],
     [0, 0, 1, 1, 1, 1, 1, 1, 0],
-    [0, 0, 1, 1, 1, 1, 1, 0, 0],
-    [0, 0, 0, 1, 1, 1, 1, 0, 0],
-    [0, 0, 0, 1, 1, 1, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0]
+    [0, 'h2', 1, 1, 1, 1, 1, 0, 0],
+    [0, 0, 'h1', 1, 1, 1, 1, 'h3', 0],
+    [0, 0, 0, 1, 1, 1, 'h4', 0, 0],
+    [0, 0, 0, 'h2', 0, 'h3', 0, 0, 0]
   ];
 
   const numberTokens = [
@@ -401,6 +506,7 @@ function processConfig(config) {
   // Create array of hex tiles and shuffle them
   const hexTiles = shuffleHexTiles(config.hexTileCounts);
   const numberTokens = shuffle(config.number_tokens);
+  const harbors = shuffleHarbors(config.harborCounts);
 
   // make empty 2d hexes array (height x width)
   config.hexes = [];
@@ -421,10 +527,18 @@ function processConfig(config) {
         numberToken = numberTokens.pop();
       }
 
+      // if the hex is a harbor, get the number from the baseMap
+      let harbor = null;
+      if (typeof baseMap[j][i] === 'string' && baseMap[j][i].startsWith('h')) {
+        harbor = harbors.pop();
+        harbor.orientation = parseInt(baseMap[j][i][1]);
+      }
+
       config.hexes[j].push({
         type: hexType,
         numberToken,
         coordinates: [i, j],
+        harbor,
       });
     }
   }
@@ -450,6 +564,18 @@ function shuffleHexTiles(hexTileCounts) {
   return shuffle(hexTiles);
 }
 
+function shuffleHarbors(harborCounts) {
+  let harbors = [];
+  for (let i = 0; i < harborCounts.length; i++) {
+    const { resource, cost, count } = harborCounts[i];
+    for (let j = 0; j < count; j++) {
+      harbors.push({ resource, cost });
+    }
+  }
+  console.log(harbors);
+  return shuffle(harbors);
+}
+
 /**
  * Draws a grid of hexagons of given width and height
  * @param {number} width - How many hexagons wide the grid is
@@ -471,7 +597,6 @@ function drawGrid(width, height) {
     leftOffset + r * MATH_CONSTANTS.SQRT_3_OVER_2,
     topOffset + r,
   ];
-  console.log(topLeft);
 
   const center = [...topLeft];
 
@@ -488,7 +613,7 @@ function drawGrid(width, height) {
 
       if (hexData.numberToken != -1) {
         ctx.beginPath();
-        ctx.arc(center[0], center[1], 20, 0, 2 * Math.PI);
+        ctx.arc(center[0], center[1], r * 0.3, 0, 2 * Math.PI);
         ctx.stroke();
 
         // fill circle
@@ -497,7 +622,54 @@ function drawGrid(width, height) {
 
         // write coords in the center of the hexagon
         ctx.fillStyle = "#000";
+        ctx.font = `${r * 0.4}px Arial`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
         ctx.fillText(hexData.numberToken, center[0], center[1]);
+      }
+
+      // harbors are marked with a box on one of the sides in the center
+      if (hexData.harbor) {
+        const side = hexData.harbor.orientation % 6;
+        const points = hexData.points;
+        const p1 = points[side];
+        const p2 = points[(side + 1) % 6];
+
+        const p3 = points[(side + 3) % 6];
+        const p4 = points[(side + 4) % 6];
+
+        const p5 = [(p1[0] + p4[0]) / 2, (p1[1] + p4[1]) / 2];
+        const p6 = [(p2[0] + p3[0]) / 2, (p2[1] + p3[1]) / 2];
+
+        ctx.beginPath();
+        ctx.moveTo(p1[0], p1[1]);
+        ctx.lineTo(p2[0], p2[1]);
+        ctx.lineTo(p6[0], p6[1]);
+        ctx.lineTo(p5[0], p5[1]);
+        ctx.lineTo(p1[0], p1[1]);
+
+        // border around the box
+        ctx.strokeStyle = "#000";
+        ctx.stroke();
+
+        // write text in the center of the box
+        ctx.fillStyle = getResourceColor(hexData.harbor.resource);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(center[0], center[1], r * 0.3, 0, 2 * Math.PI);
+        ctx.stroke();
+
+        // fill circle
+        ctx.fillStyle = getNumberTokenColor(hexData.numberToken);
+        ctx.fill();
+
+        // write coords in the center of the hexagon
+        ctx.fillStyle = "#000";
+        ctx.font = `${r * 0.3}px Arial`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(`${hexData.harbor.cost}:1`, center[0], center[1]);
       }
 
       center[0] += 2 * r * MATH_CONSTANTS.SQRT_3_OVER_2;
@@ -526,6 +698,25 @@ function getHexFillColor(hexType) {
       return "#77B336";
     case HEX_TYPES.DESERT:
       return "#A09055";
+    default:
+      return "#A8E0FF";
+  }
+}
+
+function getResourceColor(resource) {
+  switch (resource) {
+    case RESOURCES.BRICK:
+      return "#A4553C";
+    case RESOURCES.LUMBER:
+      return "#326C42";
+    case RESOURCES.ORE:
+      return "#74777F";
+    case RESOURCES.GRAIN:
+      return "#CEA322";
+    case RESOURCES.WOOL:
+      return "#77B336";
+    case RESOURCES.ANY:
+      return "#000";
     default:
       return "#A8E0FF";
   }

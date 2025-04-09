@@ -2,32 +2,9 @@ body {
   background-color: #048A81;
 }
 
-.wizard-steps .wizard-step-1 {
-  display: block;
-}
-
-.wizard-steps .wizard-step-2 {
-  display: none;
-}
-
-.wizard-steps.page-2 .wizard-step-1 {
-  display: none;
-}
-
-.wizard-steps.page-2 .wizard-step-2 {
-  display: block;
-}
-
-.wizard-steps .prev-step-btn {
-  display: none;
-}
-
-.wizard-steps.page-2 .prev-step-btn {
-  display: inline-block;
-}
-
-.wizard-steps.page-2 #generate-board-btn {
-  display: inline-block;
+#board {
+  background-color: #fff;
+  border: 1px solid #000;
 }
 
 .canvas-footer {
@@ -35,4 +12,19 @@ body {
     width: 100%;
     margin: 20px;
     text-align: center;
+}
+
+.zoom-controls {
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 5px 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#zoom-level {
+    text-align: center;
+    min-width: 120px;
+    display: inline-block;
 }
