@@ -231,11 +231,13 @@ function getBase34Config() {
   ];
 
   const baseMap = [
-    [0, 1, 1, 1, 0],
-    [1, 1, 1, 1, 0],
-    [1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 0],
-    [0, 1, 1, 1, 0],
+    [0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 1, 1, 1, 0, 0],
+    [0, 0, 1, 1, 1, 1, 0],
+    [0, 1, 1, 1, 1, 1, 0],
+    [0, 0, 1, 1, 1, 1, 0],
+    [0, 0, 1, 1, 1, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0]
   ];
 
   const config = {
@@ -357,13 +359,15 @@ function getBase56Config() {
   ];
 
   const baseMap = [
-    [0, 0, 1, 1, 1, 0],
-    [0, 1, 1, 1, 1, 0],
-    [0, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1],
-    [0, 1, 1, 1, 1, 1],
-    [0, 1, 1, 1, 1, 0],
-    [0, 0, 1, 1, 1, 0]
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 1, 1, 1, 0, 0, 0],
+    [0, 0, 0, 1, 1, 1, 1, 0, 0],
+    [0, 0, 1, 1, 1, 1, 1, 0, 0],
+    [0, 0, 1, 1, 1, 1, 1, 1, 0],
+    [0, 0, 1, 1, 1, 1, 1, 0, 0],
+    [0, 0, 0, 1, 1, 1, 1, 0, 0],
+    [0, 0, 0, 1, 1, 1, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0]
   ];
 
   const numberTokens = [
@@ -424,8 +428,6 @@ function processConfig(config) {
       });
     }
   }
-
-  console.log(config.hexes);
 }
 
 /**
@@ -458,9 +460,6 @@ function drawGrid(width, height) {
 
   // clear the canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  ctx.fillStyle = "#A8E0FF";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   const r = calculateHexRadius(width, height);
 
