@@ -6,6 +6,34 @@ body {
   background-color: #048A81;
 }
 
+.wizard-steps .wizard-step-1 {
+  display: block;
+}
+
+.wizard-steps .wizard-step-2 {
+  display: none;
+}
+
+.wizard-steps.page-2 .wizard-step-1 {
+  display: none;
+}
+
+.wizard-steps.page-2 .wizard-step-2 {
+  display: block;
+}
+
+.wizard-steps .prev-step-btn {
+  display: none;
+}
+
+.wizard-steps.page-2 .prev-step-btn {
+  display: inline-block;
+}
+
+.wizard-steps.page-2 #generate-board-btn {
+  display: inline-block;
+}
+
 .canvas-footer {
     background-color: #fff;
     width: 100%;

@@ -17,37 +17,86 @@
       <div class="container">
         <div class="row justify-content-center">
           <div class="col-12 col-md-6">
-            <div id="settings" class="card my-4">
+            <div id="settings" class="card my-4 wizard-steps">
               <div class="card-header text-center">
-                <h1 class="card-title h3">Catan Board Generator</h1>
+                <h1 class="card-title h4 m-0">Catan Board Generator</h1>
               </div>
               <div class="card-body">
                 <div class="row">
-                  <div class="col-12">
-                    <p class="mb-0">Checking my math... hopefully it's right</p>
-  
-                    <a href="https://eperezcosano.github.io/hex-grid/" target="_blank">
-                      Learned a lot from this guy's hex grid tutorial
-                    </a>
-  
-                    <br />
-  
-                    <a href="https://www.redblobgames.com/grids/hexagons/" target="_blank">
-                      This is also a good resource
-                    </a>
+                  <div class="col-12 wizard-step-1">
+                    <div class="mb-3">
+                      <label for="gameType" class="form-label">Game Type</label>
+                      <div class="form-check">
+                        <input
+                          class="form-check-input"
+                          type="radio"
+                          name="gameType"
+                          id="base34"
+                          value="BASE_3_4"
+                          checked
+                        />
+                        <label class="form-check-label" for="base34">
+                          Base Game (3-4 Players)
+                        </label>
+                      </div>
+                      <div class="form-check">
+                        <input
+                          class="form-check-input"
+                          type="radio"
+                          name="gameType"
+                          id="base56"
+                          value="BASE_5_6"
+                        />
+                        <label class="form-check-label" for="base56">
+                          Base Game (5-6 Players)
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-12 wizard-step-2">
+                    <p id="resource-card-counts">
+                      Resource Cards:
+                      <span class="badge text-bg-secondary" data-id="BRICK">BRICK: -1</span>
+                      <span class="badge text-bg-secondary" data-id="LUMBER">LUMBER: -1</span>
+                      <span class="badge text-bg-secondary" data-id="ORE">ORE: -1</span>
+                      <span class="badge text-bg-secondary" data-id="GRAIN">GRAIN: -1</span>
+                      <span class="badge text-bg-secondary" data-id="WOOL">WOOL: -1</span>
+                    </p>
+                    
+                    <p id="dev-card-counts">
+                      Development Cards:
+                      <span class="badge text-bg-secondary" data-id="KNIGHT">KNIGHT: -1</span>
+                      <span class="badge text-bg-secondary" data-id="ROAD_BUILDING">ROAD_BUILDING: -1</span>
+                      <span class="badge text-bg-secondary" data-id="YEAR_OF_PLENTY">YEAR_OF_PLENTY: -1</span>
+                      <span class="badge text-bg-secondary" data-id="MONOPOLY">MONOPOLY: -1</span>
+                      <span class="badge text-bg-secondary" data-id="VICTORY_POINT">VICTORY_POINT: -1</span>
+                    </p>
+                  </div>
+
+                  <div class="wizard-controls d-flex justify-content-between">
+                    <div>
+                      <button class="btn btn-secondary prev-step-btn">
+                        Back
+                      </button>
+                    </div>
+
+                    <div>
+                      <button id="generate-board-btn" class="btn btn-primary">
+                        Generate Board!
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-  
-        <div class="d-flex justify-content-center align-items-center flex-column">
-          <canvas id="board" width="800" height="600"></canvas>
-  
-          <div class="canvas-footer">
-            <p>🦖🦖 Made by a <a href="https://github.com/cadamsmith">green dinosaur dude</a> 🦖🦖</p>
-          </div>
+
+        <div
+          id="canvas-container"
+          class="d-flex justify-content-center align-items-center flex-column d-none mb-4"
+        >
+          <canvas id="board" width="800" height="550"></canvas>
         </div>
       </div>
     </main>
