@@ -113,6 +113,13 @@ document.querySelector("#game-type").addEventListener("change", () => {
   generateBoard();
 });
 
+document.addEventListener("keydown", (e) => {
+  if (e.code === "Space") {
+    e.preventDefault();
+    generateBoard();
+  }
+});
+
 function generateBoard() {
   if (document.querySelector("#game-type").value === "BASE_3_4") {
     config = getBoardConfig(GAME_TYPES.BASE_3_4);
@@ -444,7 +451,7 @@ function getBase56Config() {
     {
       type: DEV_CARD_TYPES.KNIGHT,
       count: 20,
-    },
+    }, 
     {
       type: DEV_CARD_TYPES.ROAD_BUILDING,
       count: 3,
