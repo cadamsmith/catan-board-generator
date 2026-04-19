@@ -39,6 +39,27 @@ const settings = {
   hexes: [],
 };
 
+// Empirical p5/p95 ranges per metric per game type, from 1000-board calibration runs.
+// Used to stretch scores so the realistic range maps to 0–100.
+const METRIC_RANGES = {
+  BASE_3_4: {
+    resourceDistribution: { min: 47, max: 73 },
+    resourceClustering: { min: 79, max: 93 },
+    probDistribution: { min: 83, max: 97 },
+    numberClustering: { min: 89, max: 100 },
+    probPerResource: { min: 74, max: 94 },
+    harborBalance: { min: 40, max: 100 },
+  },
+  BASE_5_6: {
+    resourceDistribution: { min: 57, max: 80 },
+    resourceClustering: { min: 77, max: 90 },
+    probDistribution: { min: 85, max: 97 },
+    numberClustering: { min: 88, max: 98 },
+    probPerResource: { min: 78, max: 94 },
+    harborBalance: { min: 33, max: 100 },
+  },
+};
+
 const canvas = document.getElementById("board");
 const ctx = canvas.getContext("2d");
 
@@ -84,7 +105,8 @@ document.getElementById("zoom-out").addEventListener("click", () => {
  * Updates the zoom level display in the UI
  */
 function updateZoom() {
-  document.getElementById("zoom-level").textContent = `${Math.round(zoomLevel * 100)}%`;
+  document.getElementById("zoom-level").textContent =
+    `${Math.round(zoomLevel * 100)}%`;
 }
 
 /**
@@ -92,33 +114,32 @@ function updateZoom() {
  */
 function redrawBoard() {
   if (!config) return;
-  
+
   // Clear canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  
+
   // Save context state
   ctx.save();
-  
+
   // Calculate center offset for zoom
   const centerX = canvas.width / 2;
   const centerY = canvas.height / 2;
-  
+
   // Move to center of canvas
   ctx.translate(centerX, centerY);
-  
+
   // Apply zoom transformation
   ctx.scale(zoomLevel, zoomLevel);
-  
+
   // Move back by half the canvas size to center content
   ctx.translate(-centerX, -centerY);
-  
+
   // Draw the board
   drawGrid(config.width, config.height);
-  
+
   // Restore context state
   ctx.restore();
 }
-
 
 document.querySelector("#generate-board-btn").addEventListener("click", () => {
   generateBoard();
@@ -135,10 +156,14 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-canvas.addEventListener("touchend", (e) => {
-  e.preventDefault();
-  generateBoard();
-}, { passive: false });
+canvas.addEventListener(
+  "touchend",
+  (e) => {
+    e.preventDefault();
+    generateBoard();
+  },
+  { passive: false },
+);
 
 /**
  * Generates and renders a new randomized board based on the selected game type
@@ -158,15 +183,19 @@ function generateBoard() {
 
   displayResourceCardCounts(config);
   displayDevCardCounts(config);
+  displayResourceProbabilities(config);
+  displayBalanceScore(computeBalanceScore(config));
 
   // Show the canvas container
   document.getElementById("canvas-container").classList.remove("d-none");
-  
+
   // Update canvas size after container is visible
   setTimeout(() => {
     const container = document.getElementById("canvas-container");
     canvas.width = container.clientWidth;
-    canvas.height = Math.round(Math.min(container.clientWidth * 0.9, window.innerHeight * 0.55));
+    canvas.height = Math.round(
+      Math.min(container.clientWidth * 0.9, window.innerHeight * 0.55),
+    );
     drawGrid(config.width, config.height);
   }, 0);
 }
@@ -178,20 +207,26 @@ function updateCanvasSize() {
   const container = document.getElementById("canvas-container");
   const containerWidth = container.clientWidth;
   canvas.width = containerWidth;
-  canvas.height = Math.round(Math.min(containerWidth * 0.9, window.innerHeight * 0.55));
+  canvas.height = Math.round(
+    Math.min(containerWidth * 0.9, window.innerHeight * 0.55),
+  );
   redrawBoard();
 }
 
 // Handle window resize
 window.addEventListener("resize", () => {
-  if (!document.getElementById("canvas-container").classList.contains("d-none")) {
+  if (
+    !document.getElementById("canvas-container").classList.contains("d-none")
+  ) {
     updateCanvasSize();
   }
 });
 
 // Add resize observer for container size changes
 const resizeObserver = new ResizeObserver(() => {
-  if (!document.getElementById("canvas-container").classList.contains("d-none")) {
+  if (
+    !document.getElementById("canvas-container").classList.contains("d-none")
+  ) {
     updateCanvasSize();
   }
 });
@@ -210,10 +245,11 @@ function displayResourceCardCounts(config) {
     const resourceCardCount = resourceCardCounts[i];
 
     const resourceCardCountElement = wrapperElement.querySelector(
-      `[data-id="${resourceCardCount.resource}"]`
+      `[data-id="${resourceCardCount.resource}"]`,
     );
 
-    resourceCardCountElement.querySelector(".tile-count").textContent = resourceCardCount.count;
+    resourceCardCountElement.querySelector(".tile-count").textContent =
+      resourceCardCount.count;
   }
 }
 
@@ -229,10 +265,11 @@ function displayDevCardCounts(config) {
     const devCardCount = devCardCounts[i];
 
     const devCardCountElement = wrapperElement.querySelector(
-      `[data-id="${devCardCount.type}"]`
+      `[data-id="${devCardCount.type}"]`,
     );
 
-    devCardCountElement.querySelector(".tile-count").textContent = devCardCount.count;
+    devCardCountElement.querySelector(".tile-count").textContent =
+      devCardCount.count;
   }
 }
 /**
@@ -373,16 +410,17 @@ function getBase34Config() {
   ];
 
   const baseMap = [
-    [0, 0, 'h0', 0, 'h5', 0, 0],
-    [0, 0, 1, 1, 1, 'h5', 0],
-    [0, 'h1', 1, 1, 1, 1, 0],
-    [0, 1, 1, 1, 1, 1, 'h4'],
-    [0, 'h1', 1, 1, 1, 1, 0],
-    [0, 0, 1, 1, 1, 'h3', 0],
-    [0, 0, 'h2', 0, 'h3', 0, 0]
+    [0, 0, "h0", 0, "h5", 0, 0],
+    [0, 0, 1, 1, 1, "h5", 0],
+    [0, "h1", 1, 1, 1, 1, 0],
+    [0, 1, 1, 1, 1, 1, "h4"],
+    [0, "h1", 1, 1, 1, 1, 0],
+    [0, 0, 1, 1, 1, "h3", 0],
+    [0, 0, "h2", 0, "h3", 0, 0],
   ];
 
   const config = {
+    gameType: GAME_TYPES.BASE_3_4,
     hexTileCounts,
     number_tokens: [2, 3, 3, 4, 4, 5, 5, 6, 6, 8, 8, 9, 9, 10, 10, 11, 11, 12],
     harborCounts,
@@ -486,7 +524,7 @@ function getBase56Config() {
     {
       type: DEV_CARD_TYPES.KNIGHT,
       count: 20,
-    }, 
+    },
     {
       type: DEV_CARD_TYPES.ROAD_BUILDING,
       count: 3,
@@ -506,23 +544,24 @@ function getBase56Config() {
   ];
 
   const baseMap = [
-    [0, 0, 0, 'h0', 0, 'h5', 0, 0, 0],
-    [0, 0, 0, 1, 1, 1, 'h5', 0, 0],
+    [0, 0, 0, "h0", 0, "h5", 0, 0, 0],
+    [0, 0, 0, 1, 1, 1, "h5", 0, 0],
     [0, 0, 0, 1, 1, 1, 1, 0, 0],
-    [0, 'h1', 1, 1, 1, 1, 1, 'h4', 0],
+    [0, "h1", 1, 1, 1, 1, 1, "h4", 0],
     [0, 0, 1, 1, 1, 1, 1, 1, 0],
-    [0, 'h2', 1, 1, 1, 1, 1, 0, 0],
-    [0, 0, 'h1', 1, 1, 1, 1, 'h3', 0],
-    [0, 0, 0, 1, 1, 1, 'h4', 0, 0],
-    [0, 0, 0, 'h2', 0, 'h3', 0, 0, 0]
+    [0, "h2", 1, 1, 1, 1, 1, 0, 0],
+    [0, 0, "h1", 1, 1, 1, 1, "h3", 0],
+    [0, 0, 0, 1, 1, 1, "h4", 0, 0],
+    [0, 0, 0, "h2", 0, "h3", 0, 0, 0],
   ];
 
   const numberTokens = [
-    2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6,
-    8, 8, 8, 9, 9, 9, 10, 10, 10, 11, 11, 11, 12, 12
+    2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6, 8, 8, 8, 9, 9, 9, 10, 10, 10, 11,
+    11, 11, 12, 12,
   ];
 
   const config = {
+    gameType: GAME_TYPES.BASE_5_6,
     hexTileCounts,
     number_tokens: numberTokens,
     harborCounts,
@@ -571,7 +610,7 @@ function processConfig(config) {
 
       // if the hex is a harbor, get the number from the baseMap
       let harbor = null;
-      if (typeof baseMap[j][i] === 'string' && baseMap[j][i].startsWith('h')) {
+      if (typeof baseMap[j][i] === "string" && baseMap[j][i].startsWith("h")) {
         harbor = harbors.pop();
         harbor.orientation = parseInt(baseMap[j][i][1]);
       }
@@ -619,7 +658,6 @@ function shuffleHarbors(harborCounts) {
       harbors.push({ resource, cost });
     }
   }
-  console.log(harbors);
   return shuffle(harbors);
 }
 
@@ -895,6 +933,356 @@ function shuffle(arr) {
  * @param {string} name - The name of the enum value
  * @returns {Readonly<{toString: () => string}>} A frozen object representing the enum value
  */
+/**
+ * Returns pip count (probability weight) for a number token
+ * @param {number} n
+ * @returns {number}
+ */
+function pips(n) {
+  return [0, 0, 1, 2, 3, 4, 5, 0, 5, 4, 3, 2, 1][n] ?? 0;
+}
+
+/**
+ * Returns all land hexes from config.hexes
+ * @param {Object} config
+ * @returns {Object[]}
+ */
+function getLandHexes(config) {
+  return config.hexes
+    .flat()
+    .filter((h) => h.type && h.type !== HEX_TYPES.DESERT);
+}
+
+/**
+ * Returns the 6 grid neighbors of hex at [col, row], filtering to land-only
+ * @param {number} col
+ * @param {number} row
+ * @param {Object} config
+ * @returns {Object[]}
+ */
+function getLandNeighbors(col, row, config) {
+  const isOdd = row % 2 === 1;
+  const offsets = isOdd
+    ? [
+        [-1, 0],
+        [1, 0],
+        [0, -1],
+        [1, -1],
+        [0, 1],
+        [1, 1],
+      ]
+    : [
+        [-1, 0],
+        [1, 0],
+        [-1, -1],
+        [0, -1],
+        [-1, 1],
+        [0, 1],
+      ];
+  return offsets
+    .map(([dc, dr]) => config.hexes[row + dr]?.[col + dc])
+    .filter((h) => h?.type);
+}
+
+/**
+ * Computes the CIBI-inspired balance score for the board.
+ * Returns an overall 0–100 score (higher = more balanced) and 6 sub-metric scores.
+ * @param {Object} config
+ * @returns {{ overall: number, metrics: Object }}
+ */
+/**
+ * Scores resource and probability distribution across 3 symmetry axes.
+ * For each axis, splits the board into two halves and compares.
+ * @param {Object} config
+ * @returns {{ resourceDistribution: number, probDistribution: number }}
+ */
+function scoreDistribution(config) {
+  const landHexes = config.hexes
+    .flat()
+    .filter((h) => h.type && h.type !== HEX_TYPES.DESERT);
+
+  const positions = landHexes.map((h) => {
+    const [col, row] = h.coordinates;
+    return { x: col + (row % 2 === 1 ? 0.5 : 0), y: row };
+  });
+
+  const cx = positions.reduce((s, p) => s + p.x, 0) / positions.length;
+  const cy = positions.reduce((s, p) => s + p.y, 0) / positions.length;
+
+  // Three symmetry axes for a hex board, defined by their normal vectors
+  const axes = [
+    [1, 0],
+    [0.5, MATH_CONSTANTS.SQRT_3_OVER_2],
+    [-0.5, MATH_CONSTANTS.SQRT_3_OVER_2],
+  ];
+
+  const resourceTypes = [
+    HEX_TYPES.HILLS,
+    HEX_TYPES.FOREST,
+    HEX_TYPES.MOUNTAINS,
+    HEX_TYPES.FIELDS,
+    HEX_TYPES.PASTURE,
+  ];
+
+  let totalResourceImbalance = 0;
+  let totalPipImbalance = 0;
+
+  for (const [nx, ny] of axes) {
+    let leftPips = 0,
+      rightPips = 0;
+    const leftCounts = {},
+      rightCounts = {};
+    for (const type of resourceTypes) {
+      leftCounts[type] = 0;
+      rightCounts[type] = 0;
+    }
+
+    for (let i = 0; i < landHexes.length; i++) {
+      const side = (positions[i].x - cx) * nx + (positions[i].y - cy) * ny;
+      if (side > 0) {
+        rightPips += pips(landHexes[i].numberToken);
+        rightCounts[landHexes[i].type]++;
+      } else if (side < 0) {
+        leftPips += pips(landHexes[i].numberToken);
+        leftCounts[landHexes[i].type]++;
+      }
+    }
+
+    const totalPips = leftPips + rightPips;
+    if (totalPips > 0)
+      totalPipImbalance += Math.abs(leftPips - rightPips) / totalPips;
+
+    let axisTypeImbalance = 0,
+      typeCount = 0;
+    for (const type of resourceTypes) {
+      const total = leftCounts[type] + rightCounts[type];
+      if (total > 0) {
+        axisTypeImbalance +=
+          Math.abs(leftCounts[type] - rightCounts[type]) / total;
+        typeCount++;
+      }
+    }
+    if (typeCount > 0) totalResourceImbalance += axisTypeImbalance / typeCount;
+  }
+
+  return {
+    resourceDistribution: Math.round(
+      100 * (1 - totalResourceImbalance / axes.length),
+    ),
+    probDistribution: Math.round(100 * (1 - totalPipImbalance / axes.length)),
+  };
+}
+
+/**
+ * Scores how evenly pip weight is distributed across resource types.
+ * Each resource's total pips should be proportional to its tile count.
+ * @param {Object} config
+ * @returns {number} 0–100
+ */
+function scoreProbPerResource(config) {
+  const landHexes = config.hexes
+    .flat()
+    .filter((h) => h.type && h.type !== HEX_TYPES.DESERT);
+  const totalPips = landHexes.reduce((sum, h) => sum + pips(h.numberToken), 0);
+  if (totalPips === 0) return 100;
+
+  const expectedPipsPerHex = totalPips / landHexes.length;
+  const resourceTypes = [
+    HEX_TYPES.HILLS,
+    HEX_TYPES.FOREST,
+    HEX_TYPES.MOUNTAINS,
+    HEX_TYPES.FIELDS,
+    HEX_TYPES.PASTURE,
+  ];
+
+  let totalDeviation = 0,
+    count = 0;
+  for (const type of resourceTypes) {
+    const hexesOfType = landHexes.filter((h) => h.type === type);
+    if (hexesOfType.length === 0) continue;
+    const actualPips = hexesOfType.reduce(
+      (sum, h) => sum + pips(h.numberToken),
+      0,
+    );
+    const expectedPips = hexesOfType.length * expectedPipsPerHex;
+    totalDeviation += Math.abs(actualPips - expectedPips) / expectedPips;
+    count++;
+  }
+
+  const avgDeviation = count > 0 ? totalDeviation / count : 0;
+  return Math.round(100 * Math.max(0, 1 - avgDeviation));
+}
+
+/**
+ * Scores harbor placement — penalizes specific resource harbors adjacent to their matching resource type.
+ * @param {Object} config
+ * @returns {number} 0–100
+ */
+function scoreHarborBalance(config) {
+  const resourceToHexType = new Map([
+    [RESOURCES.BRICK, HEX_TYPES.HILLS],
+    [RESOURCES.LUMBER, HEX_TYPES.FOREST],
+    [RESOURCES.ORE, HEX_TYPES.MOUNTAINS],
+    [RESOURCES.GRAIN, HEX_TYPES.FIELDS],
+    [RESOURCES.WOOL, HEX_TYPES.PASTURE],
+  ]);
+
+  const specificHarbors = config.hexes
+    .flat()
+    .filter((h) => h.harbor && h.harbor.resource !== RESOURCES.ANY);
+  if (specificHarbors.length === 0) return 100;
+
+  let matchCount = 0;
+  for (const hex of specificHarbors) {
+    const [col, row] = hex.coordinates;
+    const matchingType = resourceToHexType.get(hex.harbor.resource);
+    if (
+      getLandNeighbors(col, row, config).some((n) => n.type === matchingType)
+    ) {
+      matchCount++;
+    }
+  }
+
+  return Math.round(100 * (1 - matchCount / specificHarbors.length));
+}
+
+/**
+ * Computes all 6 balance metrics, normalizes them using empirical ranges, and returns the overall score
+ * @param {Object} config
+ * @returns {{ overall: number, metrics: Object }}
+ */
+function computeBalanceScore(config) {
+  let totalTypedPairs = 0,
+    sameTypePairs = 0;
+  let totalTokenPairs = 0,
+    sameTokenPairs = 0;
+
+  for (const hex of config.hexes.flat()) {
+    if (!hex.type) continue;
+    const [col, row] = hex.coordinates;
+    for (const nb of getLandNeighbors(col, row, config)) {
+      const [nc, nr] = nb.coordinates;
+      if (nr < row || (nr === row && nc < col)) continue; // count each pair once
+
+      totalTypedPairs++;
+      if (hex.type === nb.type) sameTypePairs++;
+
+      if (hex.numberToken !== -1 && nb.numberToken !== -1) {
+        totalTokenPairs++;
+        if (hex.numberToken === nb.numberToken) sameTokenPairs++;
+      }
+    }
+  }
+
+  const resourceClustering =
+    totalTypedPairs > 0
+      ? Math.round(100 * (1 - sameTypePairs / totalTypedPairs))
+      : 100;
+
+  const numberClustering =
+    totalTokenPairs > 0
+      ? Math.round(100 * (1 - sameTokenPairs / totalTokenPairs))
+      : 100;
+
+  const { resourceDistribution, probDistribution } = scoreDistribution(config);
+
+  const rawMetrics = {
+    resourceDistribution,
+    resourceClustering,
+    probDistribution,
+    numberClustering,
+    probPerResource: scoreProbPerResource(config),
+    harborBalance: scoreHarborBalance(config),
+  };
+
+  const ranges = METRIC_RANGES[config.gameType.toString()];
+  const metrics = {};
+  for (const [key, raw] of Object.entries(rawMetrics)) {
+    const { min, max } = ranges[key];
+    metrics[key] = Math.round(
+      Math.max(0, Math.min(100, ((raw - min) / (max - min)) * 100)),
+    );
+  }
+
+  const overall = Math.round(
+    Object.values(metrics).reduce((a, b) => a + b, 0) /
+      Object.keys(metrics).length,
+  );
+
+  return { overall, metrics };
+}
+
+/**
+ * Updates the resource probability display — roll probability per resource type
+ * @param {Object} config
+ */
+function displayResourceProbabilities(config) {
+  document.getElementById("resource-probs-section").style.display = "";
+
+  const resourceHexTypeMap = new Map([
+    [RESOURCES.BRICK, HEX_TYPES.HILLS],
+    [RESOURCES.LUMBER, HEX_TYPES.FOREST],
+    [RESOURCES.ORE, HEX_TYPES.MOUNTAINS],
+    [RESOURCES.GRAIN, HEX_TYPES.FIELDS],
+    [RESOURCES.WOOL, HEX_TYPES.PASTURE],
+  ]);
+
+  const wrapper = document.getElementById("resource-probs");
+  for (const [resource, hexType] of resourceHexTypeMap) {
+    const uniqueTokens = [
+      ...new Set(
+        config.hexes
+          .flat()
+          .filter((h) => h.type === hexType && h.numberToken !== -1)
+          .map((h) => h.numberToken),
+      ),
+    ];
+    const prob =
+      ((uniqueTokens.reduce((sum, t) => sum + pips(t), 0) / 36) * 100).toFixed(
+        1,
+      ) + "%";
+    wrapper.querySelector(`[data-id="${resource}"] .tile-count`).textContent =
+      prob;
+  }
+}
+
+/**
+ * Converts a 0–100 score to a letter grade
+ * @param {number} score
+ * @returns {string}
+ */
+function toGrade(score) {
+  if (score >= 75) return "A";
+  if (score >= 50) return "B";
+  if (score >= 25) return "C";
+  return "D";
+}
+
+/**
+ * Updates the balance section UI with overall grade label and per-metric letter grades
+ * @param {{ overall: number, metrics: Object }} scoreData
+ */
+function displayBalanceScore({ overall, metrics }) {
+  document.getElementById("balance-section").style.display = "";
+
+  const label = document.getElementById("balance-label");
+  if (overall >= 75) label.textContent = "Excellent";
+  else if (overall >= 50) label.textContent = "Good";
+  else if (overall >= 25) label.textContent = "Fair";
+  else label.textContent = "Poor";
+
+  for (const [key, score] of Object.entries(metrics)) {
+    const tile = document.querySelector(`[data-metric="${key}"]`);
+    if (!tile) continue;
+    tile.querySelector(".metric-grade").textContent = toGrade(score);
+  }
+}
+
+/**
+ * Creates a frozen enum-like value with a descriptive toString
+ * @param {string} name
+ * @returns {Readonly<{toString: () => string}>}
+ */
 function enumValue(name) {
   return Object.freeze({ toString: () => name });
 }
@@ -905,5 +1293,11 @@ function enumValue(name) {
  * @returns {string} Human-readable title-cased string
  */
 function toDisplayName(value) {
-  return value.toString().replace(/_/g, " ").replace(/\w\S*/g, (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+  return value
+    .toString()
+    .replace(/_/g, " ")
+    .replace(
+      /\w\S*/g,
+      (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase(),
+    );
 }
