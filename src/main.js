@@ -1204,9 +1204,10 @@ function computeBalanceScore(config) {
     );
   }
 
+  const weights = { numberClustering: 1.5 };
+  const totalWeight = Object.keys(metrics).reduce((sum, k) => sum + (weights[k] ?? 1), 0);
   const overall = Math.round(
-    Object.values(metrics).reduce((a, b) => a + b, 0) /
-      Object.keys(metrics).length,
+    Object.entries(metrics).reduce((sum, [k, v]) => sum + v * (weights[k] ?? 1), 0) / totalWeight,
   );
 
   return { overall, metrics };
