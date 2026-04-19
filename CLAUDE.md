@@ -33,11 +33,26 @@ All logic lives in two files:
 
 ### Hex geometry
 
-Hexagons are flat-topped, drawn with a `sin/cos` loop starting from the top vertex. The `MATH_CONSTANTS` object holds precomputed values (`SQRT_3`, `SQRT_3_OVER_2`, `SIXTY_DEGREES`).
+Hexagons are pointy-topped, drawn with a `sin/cos` loop. Vertices start at the bottom and go clockwise. The grid uses odd-r offset coordinates (odd rows shift right by half a hex). The `MATH_CONSTANTS` object holds precomputed values (`SQRT_3`, `SQRT_3_OVER_2`, `SIXTY_DEGREES`).
 
 ### Enum pattern
 
 `enumValue(name)` creates frozen objects with a `toString()` — used for `GAME_TYPES`, `RESOURCES`, `HEX_TYPES`, and `DEV_CARD_TYPES`. Compare with `===`.
+
+### Balance scoring
+
+After each board generation, `computeBalanceScore(config)` computes 6 metrics and returns a normalized `{ overall, metrics }` object:
+
+1. **Resource Distribution** — how evenly each resource type is spread across 3 symmetry axes
+2. **Resource Clustering** — penalizes same-type hexes sharing an edge
+3. **Probability Distribution** — how evenly pip weight is distributed across the 3 axes
+4. **Number Clustering** — penalizes same-number tokens on adjacent hexes
+5. **Probability Per Resource** — each resource's pip total should be proportional to its tile count
+6. **Harbor Balance** — penalizes specific resource harbors adjacent to their matching resource type
+
+Raw scores are normalized using empirical p5/p95 ranges stored in `METRIC_RANGES` (keyed by game type, determined via 1000-board calibration runs). Normalized scores map to letter grades (A/B/C/D) per metric and Poor/Fair/Good/Excellent overall. To recalibrate, temporarily restore `window.runCalibration` and run it in the browser console.
+
+`getLandNeighbors(col, row, config)` returns the up-to-6 land hex neighbors using odd-r offset coordinate math — reuse this whenever adjacency is needed.
 
 ## Key Behaviors
 
@@ -45,7 +60,9 @@ Hexagons are flat-topped, drawn with a `sin/cos` loop starting from the top vert
 - Zoom controls (+ / -) apply a canvas `scale()` transform without regenerating.
 - Canvas width and height resize responsively via `ResizeObserver`; height is capped at `min(width * 0.9, innerHeight * 0.55)`.
 - 6 and 8 number tokens render with a pink background (`#FFA8B5`) to highlight high-probability tiles.
-- The settings panel (game type select + card counts) is collapsible on mobile via a toggle button in the header.
+- The settings panel (game type select, card counts, resource probabilities, and balance score) is collapsible on mobile via a toggle button in the header.
+- Resource probability tiles show the true roll probability per resource (sum of unique token probabilities).
+- Balance score and resource probability sections are hidden until the first board is generated.
 
 ## UI / Theme
 

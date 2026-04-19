@@ -8,6 +8,8 @@ A static web app that generates randomized Catan board layouts. No install, no b
 
 - **Randomized boards** for both Base Game (3–4 players) and Base Game (5–6 players)
 - **Harbor placement** is also randomized, with correct edge orientations
+- **Balance scoring** — each board is graded on 6 metrics (resource distribution, clustering, probability spread, harbor placement) so you can keep regenerating until you get a well-balanced layout
+- **Resource probability** — see the actual roll probability for each resource type
 - **Card count reference** — colored tiles show resource and development card counts at a glance
 - **Zoom controls** to zoom in/out without regenerating the board
 - **Keyboard shortcut** — press `Space` to regenerate
