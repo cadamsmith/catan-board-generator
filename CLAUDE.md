@@ -16,7 +16,7 @@ All logic lives in two files:
 
 - **`src/main.js`** — Single-file vanilla JS. Contains all game logic and rendering.
 - **`src/index.html`** — Bootstrap 5 UI with a `<canvas id="board">` for rendering.
-- **`src/main.css`** — Minimal custom styles on top of Bootstrap.
+- **`src/main.css`** — Parchment/wood theme styles on top of Bootstrap.
 
 ### Board generation flow
 
@@ -41,7 +41,15 @@ Hexagons are flat-topped, drawn with a `sin/cos` loop starting from the top vert
 
 ## Key Behaviors
 
-- Spacebar or "Generate Board!" button regenerates the board.
+- Spacebar, the "Regenerate Board" button, or tapping the canvas (mobile) regenerates the board.
 - Zoom controls (+ / -) apply a canvas `scale()` transform without regenerating.
-- Canvas resizes responsively via `ResizeObserver`.
+- Canvas width and height resize responsively via `ResizeObserver`; height is capped at `min(width * 0.9, innerHeight * 0.55)`.
 - 6 and 8 number tokens render with a pink background (`#FFA8B5`) to highlight high-probability tiles.
+- The settings panel (game type select + card counts) is collapsible on mobile via a toggle button in the header.
+
+## UI / Theme
+
+- Parchment background (`#faf3e0`) and wood-brown border (`#5D3A1A`) applied to both the settings card and board canvas via `box-shadow`.
+- Card count tiles use the same colors as their corresponding hex tile types.
+- Playfair Display (Google Fonts) is used for the page title.
+- `toDisplayName(value)` converts `SCREAMING_SNAKE_CASE` enum names to Title Case for display.
