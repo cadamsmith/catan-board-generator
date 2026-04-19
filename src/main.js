@@ -58,6 +58,15 @@ let config;
 
 generateBoard();
 
+const settingsBody = document.getElementById("settings-body");
+const settingsToggle = document.getElementById("settings-toggle");
+settingsBody.addEventListener("show.bs.collapse", () => {
+  settingsToggle.querySelector("i").className = "bi bi-sliders2";
+});
+settingsBody.addEventListener("hide.bs.collapse", () => {
+  settingsToggle.querySelector("i").className = "bi bi-sliders";
+});
+
 // Add zoom event listeners
 document.getElementById("zoom-in").addEventListener("click", () => {
   zoomLevel = Math.min(zoomLevel + ZOOM_FACTOR, MAX_ZOOM);
@@ -75,7 +84,7 @@ document.getElementById("zoom-out").addEventListener("click", () => {
  * Updates the zoom level display in the UI
  */
 function updateZoom() {
-  document.getElementById("zoom-level").textContent = `Zoom: ${Math.round(zoomLevel * 100)}%`;
+  document.getElementById("zoom-level").textContent = `${Math.round(zoomLevel * 100)}%`;
 }
 
 /**
@@ -126,6 +135,11 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
+canvas.addEventListener("touchend", (e) => {
+  e.preventDefault();
+  generateBoard();
+}, { passive: false });
+
 /**
  * Generates and renders a new randomized board based on the selected game type
  */
@@ -151,7 +165,8 @@ function generateBoard() {
   // Update canvas size after container is visible
   setTimeout(() => {
     const container = document.getElementById("canvas-container");
-    canvas.width = container.clientWidth
+    canvas.width = container.clientWidth;
+    canvas.height = Math.round(Math.min(container.clientWidth * 0.9, window.innerHeight * 0.55));
     drawGrid(config.width, config.height);
   }, 0);
 }
@@ -163,6 +178,7 @@ function updateCanvasSize() {
   const container = document.getElementById("canvas-container");
   const containerWidth = container.clientWidth;
   canvas.width = containerWidth;
+  canvas.height = Math.round(Math.min(containerWidth * 0.9, window.innerHeight * 0.55));
   redrawBoard();
 }
 
@@ -197,7 +213,7 @@ function displayResourceCardCounts(config) {
       `[data-id="${resourceCardCount.resource}"]`
     );
 
-    resourceCardCountElement.textContent = `${resourceCardCount.resource}: ${resourceCardCount.count}`;
+    resourceCardCountElement.querySelector(".tile-count").textContent = resourceCardCount.count;
   }
 }
 
@@ -216,7 +232,7 @@ function displayDevCardCounts(config) {
       `[data-id="${devCardCount.type}"]`
     );
 
-    devCardCountElement.textContent = `${devCardCount.type}: ${devCardCount.count}`;
+    devCardCountElement.querySelector(".tile-count").textContent = devCardCount.count;
   }
 }
 /**
@@ -881,4 +897,13 @@ function shuffle(arr) {
  */
 function enumValue(name) {
   return Object.freeze({ toString: () => name });
+}
+
+/**
+ * Converts a SCREAMING_SNAKE_CASE enum name to Title Case for display
+ * @param {Object|string} value - An enum value or string
+ * @returns {string} Human-readable title-cased string
+ */
+function toDisplayName(value) {
+  return value.toString().replace(/_/g, " ").replace(/\w\S*/g, (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
 }

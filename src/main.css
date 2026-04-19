@@ -2,29 +2,229 @@ body {
   background-color: #048A81;
 }
 
-#board {
+/* === Typography === */
+.card-title {
+  font-family: "Playfair Display", Georgia, serif;
+  font-weight: 700;
+  font-size: 1.5rem;
+  letter-spacing: 0.01em;
+}
+
+/* === Settings Card === */
+#settings {
+  background-color: #faf3e0;
+  border: none;
+  border-radius: 6px;
+  box-shadow:
+    0 0 0 5px #5D3A1A,
+    0 8px 28px rgba(0, 0, 0, 0.5),
+    inset 0 0 30px rgba(93, 58, 26, 0.08);
+}
+
+#settings .card-header {
+  background-color: transparent;
+  border-bottom-color: rgba(93, 58, 26, 0.2);
+}
+
+/* === Controls === */
+#game-type {
   background-color: #fff;
-  border: 1px solid #000;
+  border-color: rgba(93, 58, 26, 0.4);
+  color: #3A2010;
 }
 
-.canvas-footer {
-    background-color: #fff;
-    width: 100%;
-    margin: 20px;
-    text-align: center;
+#game-type:focus {
+  border-color: #5D3A1A;
+  box-shadow: 0 0 0 0.2rem rgba(93, 58, 26, 0.2);
 }
 
+.form-floating > label {
+  color: #7B4A2A;
+}
+
+
+#generate-board-btn kbd {
+  font-family: inherit;
+  font-size: 0.7em;
+  background: rgba(93, 58, 26, 0.1);
+  border: 1px solid rgba(93, 58, 26, 0.4);
+  color: #5D3A1A;
+  border-radius: 3px;
+  padding: 1px 5px;
+  vertical-align: baseline;
+  position: relative;
+  top: -1px;
+}
+
+#generate-board-btn:hover kbd {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #faf3e0;
+}
+
+#settings .btn-dark {
+  background-color: transparent;
+  border-color: #5D3A1A;
+  color: #5D3A1A;
+}
+
+#settings .btn-dark:hover,
+#settings .btn-dark:focus {
+  background-color: #5D3A1A;
+  border-color: #5D3A1A;
+  color: #faf3e0;
+}
+
+/* === Card Count Tiles === */
+.counts-section-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #7B4A2A;
+  margin-bottom: 0.4rem;
+}
+
+.tiles-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.tiles-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.count-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.3rem 0.65rem 0.4rem;
+  border-radius: 6px;
+  min-width: 58px;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+
+.tile-name {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+
+.tile-count {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+/* === Tile Colors === */
+[data-id="BRICK"]          { background-color: #A4553C; }
+[data-id="LUMBER"]         { background-color: #326C42; }
+[data-id="ORE"]            { background-color: #74777F; }
+[data-id="GRAIN"]          { background-color: #A07A10; }
+[data-id="WOOL"]           { background-color: #4E8C20; }
+[data-id="KNIGHT"]         { background-color: #3B4A6B; }
+[data-id="ROAD_BUILDING"]  { background-color: #7A5C1E; }
+[data-id="YEAR_OF_PLENTY"] { background-color: #1B6B3A; }
+[data-id="MONOPOLY"]       { background-color: #7B2D00; }
+[data-id="VICTORY_POINT"]  { background-color: #6A0572; }
+
+/* === Board Canvas === */
+.board-wrapper {
+  position: relative;
+  width: 100%;
+  line-height: 0;
+}
+
+#board {
+  display: block;
+  background-color: #faf3e0;
+  border-radius: 6px;
+  box-shadow:
+    0 0 0 5px #5D3A1A,
+    0 8px 28px rgba(0, 0, 0, 0.5),
+    inset 0 0 30px rgba(93, 58, 26, 0.08);
+}
+
+/* === Floating Zoom Controls === */
 .zoom-controls {
-    background-color: rgba(255, 255, 255, 0.8);
-    padding: 5px 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  position: absolute;
+  bottom: 14px;
+  right: 14px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 999px;
+  padding: 3px 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(4px);
+  font-size: 0.82rem;
+  line-height: 1;
+}
+
+.zoom-controls button {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 3px;
+  color: #444;
+  font-weight: bold;
+}
+
+.zoom-controls button:hover {
+  color: #000;
 }
 
 #zoom-level {
-    text-align: center;
-    min-width: 120px;
-    display: inline-block;
+  min-width: 60px;
+  text-align: center;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  #board {
+    cursor: pointer;
+  }
+}
+
+.tap-hint {
+  text-align: center;
+  font-size: 0.75rem;
+  color: rgba(250, 243, 224, 0.7);
+  margin: 0.35rem 0 0;
+  line-height: 1;
+}
+
+/* === Responsive === */
+@media (min-width: 768px) {
+  #settings-body {
+    display: block !important;
+  }
+}
+
+@media (max-width: 575px) {
+  .container {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .card-body {
+    padding: 0.75rem;
+  }
+
+  .card-header {
+    padding: 0.5rem 0.75rem;
+  }
 }
