@@ -71,10 +71,16 @@ document.getElementById("zoom-out").addEventListener("click", () => {
   redrawBoard();
 });
 
+/**
+ * Updates the zoom level display in the UI
+ */
 function updateZoom() {
   document.getElementById("zoom-level").textContent = `Zoom: ${Math.round(zoomLevel * 100)}%`;
 }
 
+/**
+ * Redraws the current board with the active zoom level applied
+ */
 function redrawBoard() {
   if (!config) return;
   
@@ -120,6 +126,9 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
+/**
+ * Generates and renders a new randomized board based on the selected game type
+ */
 function generateBoard() {
   if (document.querySelector("#game-type").value === "BASE_3_4") {
     config = getBoardConfig(GAME_TYPES.BASE_3_4);
@@ -147,7 +156,9 @@ function generateBoard() {
   }, 0);
 }
 
-// Set initial canvas size
+/**
+ * Resizes the canvas to match its container width and redraws the board
+ */
 function updateCanvasSize() {
   const container = document.getElementById("canvas-container");
   const containerWidth = container.clientWidth;
@@ -171,6 +182,10 @@ const resizeObserver = new ResizeObserver(() => {
 
 resizeObserver.observe(document.getElementById("canvas-container"));
 
+/**
+ * Updates the resource card count display in the UI
+ * @param {Object} config - The configuration object containing resourceCardCounts
+ */
 function displayResourceCardCounts(config) {
   const resourceCardCounts = config.resourceCardCounts;
   const wrapperElement = document.getElementById("resource-card-counts");
@@ -186,6 +201,10 @@ function displayResourceCardCounts(config) {
   }
 }
 
+/**
+ * Updates the development card count display in the UI
+ * @param {Object} config - The configuration object containing devCardCounts
+ */
 function displayDevCardCounts(config) {
   const devCardCounts = config.devCardCounts;
   const wrapperElement = document.getElementById("dev-card-counts");
@@ -571,6 +590,11 @@ function shuffleHexTiles(hexTileCounts) {
   return shuffle(hexTiles);
 }
 
+/**
+ * Flattens harbor counts into a single array and shuffles them
+ * @param {Object[]} harborCounts - The harbor counts with resource, cost, and count fields
+ * @returns {Object[]} The shuffled harbors
+ */
 function shuffleHarbors(harborCounts) {
   let harbors = [];
   for (let i = 0; i < harborCounts.length; i++) {
@@ -691,6 +715,11 @@ function drawGrid(width, height) {
   }
 }
 
+/**
+ * Returns the fill color for a given hex tile type
+ * @param {Object} hexType - A HEX_TYPES enum value
+ * @returns {string} A CSS hex color string
+ */
 function getHexFillColor(hexType) {
   switch (hexType) {
     case HEX_TYPES.HILLS:
@@ -710,6 +739,11 @@ function getHexFillColor(hexType) {
   }
 }
 
+/**
+ * Returns the fill color for a given resource type, used for harbor boxes
+ * @param {Object} resource - A RESOURCES enum value
+ * @returns {string} A CSS hex color string
+ */
 function getResourceColor(resource) {
   switch (resource) {
     case RESOURCES.BRICK:
@@ -729,6 +763,11 @@ function getResourceColor(resource) {
   }
 }
 
+/**
+ * Returns the background color for a number token circle; highlights 6 and 8 in pink
+ * @param {number} numberToken - The number token value
+ * @returns {string} A CSS hex color string
+ */
 function getNumberTokenColor(numberToken) {
   if (numberToken === 6 || numberToken === 8) {
     return "#FFA8B5";
@@ -823,6 +862,11 @@ function getCanvasHeight() {
   return canvas.height - 2 * padding;
 }
 
+/**
+ * Returns a randomly shuffled copy of the given array
+ * @param {any[]} arr - The array to shuffle
+ * @returns {any[]} A new shuffled array
+ */
 function shuffle(arr) {
   return arr
     .map((v) => ({ val: v, key: Math.random() }))
@@ -830,6 +874,11 @@ function shuffle(arr) {
     .map((o) => o.val);
 }
 
+/**
+ * Creates a frozen enum-like value with a descriptive toString
+ * @param {string} name - The name of the enum value
+ * @returns {Readonly<{toString: () => string}>} A frozen object representing the enum value
+ */
 function enumValue(name) {
   return Object.freeze({ toString: () => name });
 }
