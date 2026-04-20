@@ -126,6 +126,11 @@ body {
   line-height: 1.15;
 }
 
+#resource-card-counts .count-tile,
+#resource-probs .count-tile {
+  width: 80px;
+}
+
 /* === Tile Colors === */
 [data-id="BRICK"]          { background-color: #A4553C; }
 [data-id="LUMBER"]         { background-color: #326C42; }
