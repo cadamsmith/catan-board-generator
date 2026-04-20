@@ -190,13 +190,15 @@ function generateBoard() {
   document.getElementById("canvas-container").classList.remove("d-none");
 
   // Update canvas size after container is visible
-  setTimeout(() => {
+  requestAnimationFrame(() => {
+    
     const container = document.getElementById("canvas-container");
     canvas.width = container.clientWidth;
     canvas.height = Math.round(
       Math.min(container.clientWidth * 0.9, window.innerHeight * 0.55),
     );
     drawGrid(config.width, config.height);
+    drawBoard();
   }, 0);
 }
 
