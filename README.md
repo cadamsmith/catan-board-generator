@@ -1,10 +1,10 @@
-# Catan Board Generator
+🎲 catan-board-generator
 
 A static web app that generates randomized Catan board layouts. No install, no build step — just open `src/index.html` in a browser.
 
 ![Catan Board Generator](docs/media/readme_image.png)
 
-## Features
+## features
 
 - **Randomized boards** for both Base Game (3–4 players) and Base Game (5–6 players)
 - **Harbor placement** is also randomized, with correct edge orientations
@@ -15,7 +15,7 @@ A static web app that generates randomized Catan board layouts. No install, no b
 - **Keyboard shortcut** — press `Space` to regenerate
 - **Mobile friendly** — tap the board to regenerate; settings panel collapses to save screen space
 
-## Usage
+## usage
 
 Open `src/index.html` directly in any modern browser. No server or dependencies required.
 
@@ -23,7 +23,7 @@ Open `src/index.html` directly in any modern browser. No server or dependencies 
 2. A randomized board is generated automatically
 3. Press **Regenerate Board**, hit `Space`, or tap the board to generate a new layout
 
-## Project Structure
+## project structure
 
 ```
 src/
@@ -33,7 +33,7 @@ src/
   favicon.png
 ```
 
-## Development
+## development
 
 No build tools are needed. Edit the files directly and refresh the browser.
 
