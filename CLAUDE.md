@@ -1,16 +1,16 @@
-# CLAUDE.md
+# 🎲 catan-board-generator: claude.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project Overview
+## project overview
 
 A static, no-build-step web app that generates randomized Catan board layouts. Open `src/index.html` directly in a browser — there is no dev server, bundler, or package manager.
 
-## Running the App
+## running the app
 
 Open `src/index.html` in a browser. No installation or build step required.
 
-## Architecture
+## architecture
 
 All logic lives in two files:
 
@@ -18,7 +18,7 @@ All logic lives in two files:
 - **`src/index.html`** — Bootstrap 5 UI with a `<canvas id="board">` for rendering.
 - **`src/main.css`** — Parchment/wood theme styles on top of Bootstrap.
 
-### Board generation flow
+### board generation flow
 
 1. `generateBoard()` reads the `#game-type` select, calls `getBoardConfig()` to get the game config (tile counts, number tokens, harbors), then calls `processConfig()` and `drawGrid()`.
 2. `processConfig(config)` — shuffles hex tiles, number tokens, and harbors; populates `config.hexes[j][i]` with `{ type, numberToken, coordinates, harbor }` objects using the `baseMap` 2D array as a template.
@@ -31,15 +31,15 @@ All logic lives in two files:
 - `0` = empty (water/nothing drawn)
 - `'h0'`–`'h5'` = harbor tile; the number is the edge orientation (0–5) indicating which hex side faces land
 
-### Hex geometry
+### hex geometry
 
 Hexagons are pointy-topped, drawn with a `sin/cos` loop. Vertices start at the bottom and go clockwise. The grid uses odd-r offset coordinates (odd rows shift right by half a hex). The `MATH_CONSTANTS` object holds precomputed values (`SQRT_3`, `SQRT_3_OVER_2`, `SIXTY_DEGREES`).
 
-### Enum pattern
+### enum pattern
 
 `enumValue(name)` creates frozen objects with a `toString()` — used for `GAME_TYPES`, `RESOURCES`, `HEX_TYPES`, and `DEV_CARD_TYPES`. Compare with `===`.
 
-### Balance scoring
+### balance scoring
 
 After each board generation, `computeBalanceScore(config)` computes 6 metrics and returns a normalized `{ overall, metrics }` object:
 
@@ -54,7 +54,7 @@ Raw scores are normalized using empirical p5/p95 ranges stored in `METRIC_RANGES
 
 `getLandNeighbors(col, row, config)` returns the up-to-6 land hex neighbors using odd-r offset coordinate math — reuse this whenever adjacency is needed.
 
-## Key Behaviors
+## key behaviors
 
 - Spacebar, the "Regenerate Board" button, or tapping the canvas (mobile) regenerates the board.
 - Zoom controls (+ / -) apply a canvas `scale()` transform without regenerating.
@@ -64,7 +64,7 @@ Raw scores are normalized using empirical p5/p95 ranges stored in `METRIC_RANGES
 - Resource probability tiles show the true roll probability per resource (sum of unique token probabilities).
 - Balance score and resource probability sections are hidden until the first board is generated.
 
-## UI / Theme
+## ui / theme
 
 - Parchment background (`#faf3e0`) and wood-brown border (`#5D3A1A`) applied to both the settings card and board canvas via `box-shadow`.
 - Card count tiles use the same colors as their corresponding hex tile types.
