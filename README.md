@@ -1,4 +1,4 @@
-🎲 catan-board-generator
+# 🎲 catan-board-generator
 
 A static web app that generates randomized Catan board layouts. No install, no build step — just open `src/index.html` in a browser.
 
